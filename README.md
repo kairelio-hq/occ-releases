@@ -23,7 +23,9 @@ The installer checks the release archive against its SHA-256 checksum and puts `
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Run the same install command to upgrade. Remove the binary with `rm "$HOME/.local/bin/occ"`.
+Run the same install command to upgrade. The installer records the installation source in
+`.occ-install` next to the binary. Remove the installation with
+`rm "$HOME/.local/bin/occ" "$HOME/.local/bin/.occ-install"`.
 Set `OCC_VERSION` to pin a version or `OCC_INSTALL_DIR` to choose a different absolute,
 writable directory. Pass those variables to the `sh` side of the pipe. For example:
 

@@ -43,7 +43,8 @@ main() {
     umask 077
     tmp=$(mktemp -d "${TMPDIR:-/tmp}/occ-install.XXXXXX")
     staged=
-    trap 'if [ -n "$staged" ]; then rm -f "$staged"; fi; rm -rf "$tmp"' EXIT
+    receipt=
+    trap 'if [ -n "$staged" ]; then rm -f "$staged"; fi; if [ -n "$receipt" ]; then rm -f "$receipt"; fi; rm -rf "$tmp"' EXIT
     trap 'exit 1' HUP INT TERM
 
     fetch -o "$tmp/$archive" "$release/$archive" || fail "could not download $archive"
@@ -63,12 +64,17 @@ main() {
 
     mkdir -p "$dest"
     [ ! -d "$dest/occ" ] || fail "$dest/occ is a directory"
+    [ ! -d "$dest/.occ-install" ] || fail "$dest/.occ-install is a directory"
     staged=$(mktemp "$dest/.occ.XXXXXX")
+    receipt=$(mktemp "$dest/.occ-install.XXXXXX")
+    printf 'occ-releases/v1\n' > "$receipt"
     tar -xOzf "$tmp/$archive" occ > "$staged" || fail "could not extract occ"
     [ -s "$staged" ] || fail "release contains an empty binary"
     chmod 0755 "$staged"
     mv -f "$staged" "$dest/occ"
     staged=
+    mv -f "$receipt" "$dest/.occ-install"
+    receipt=
     printf 'Installed occ %s to %s/occ\n' "$version" "$dest"
     case ":$PATH:" in
         *":$dest:"*) ;;
